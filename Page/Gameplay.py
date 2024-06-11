@@ -41,7 +41,17 @@ class Gameplay(Page):
         }
 
     def BuildPage(self):
-        topSizer = wx.BoxSizer(wx.HORIZONTAL)
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+
+        gridSizer = wx.BoxSizer(wx.VERTICAL)
+        for tray in (3,2,1):
+            rowSizer = wx.BoxSizer(wx.HORIZONTAL)
+            for button in (1,2,3,4,5,6,7,8,9,0):
+                rowSizer.Add(wx.Button(self, wx.ID_ANY, str(button)))
+            gridSizer.Add(rowSizer, 0, wx.ALL|wx.EXPAND)
+
+
+        bottomSizer = wx.BoxSizer(wx.HORIZONTAL)
 
         leftSizer = wx.BoxSizer(wx.VERTICAL)
         rightSizer = wx.BoxSizer(wx.VERTICAL)
@@ -79,37 +89,6 @@ class Gameplay(Page):
             )
         leftSizer.Add(TPSDirectBox, 0, wx.EXPAND|wx.ALL, 10)
 
-        ##### Team Select Binds
-        teamenablesizer = wx.BoxSizer(wx.HORIZONTAL)
-        teamenable = wx.CheckBox( self, -1, 'Enable Team Select')
-        teamenable.SetToolTip( wx.ToolTip('Check this to enable the Next/Prev Team Select Binds') )
-        teamenable.Bind(wx.EVT_CHECKBOX, self.OnTeamEnable)
-        self.Ctrls['TeamEnable'] = teamenable
-        teamenable.SetValue(self.Init['TeamEnable'])
-
-        teamhelpbutton = HelpButton(self, 'TeamSelectBinds.html')
-
-        teamenablesizer.Add(teamenable, 0, wx.ALIGN_CENTER_VERTICAL)
-        teamenablesizer.Add(teamhelpbutton, wx.ALIGN_RIGHT)
-
-        leftSizer.Add(teamenablesizer, 0, wx.ALL, 10)
-
-        TeamSelBox = ControlGroup(self, self, 'Team Select')
-        for b in (
-            ['SelPrevTeam' , 'Choose the key that will select the previous teammate from the currently selected one'] ,
-            ['SelNextTeam' , 'Choose the key that will select the next teammate from the currently selected one']     ,
-            ['DecTeamSize' , 'Choose the key that will decrease the size of your teammate rotation']                  ,
-            ['IncTeamSize' , 'Choose the key that will increase the size of your teammate rotation']                  ,
-            ['DecTeamPos'  , 'Choose the key that will move you to the next lower position in the team rotation']         ,
-            ['IncTeamPos'  , 'Choose the key that will move you to the next higher position in the team rotation']        ,
-            ['TeamReset'   , 'Choose the key that will reset your next/prev teammate binds to Solo / No Position']                             ,
-        ):
-            TeamSelBox.AddControl(
-                ctlName = b[0],
-                ctlType = 'keybutton',
-                tooltip = b[1],
-            )
-        leftSizer.Add(TeamSelBox, 0, wx.EXPAND|wx.ALL, 10)
 
         ### Helpful Binds
         HelpfulSizer = ControlGroup(self, self, 'Helpful Binds')
@@ -127,11 +106,44 @@ class Gameplay(Page):
 
         rightSizer.Add(HelpfulSizer, 0, wx.EXPAND|wx.ALL, 10)
 
-        topSizer.Add(leftSizer, 0, wx.ALL|wx.EXPAND, 10)
-        topSizer.Add(rightSizer, 0, wx.ALL|wx.EXPAND, 10)
-        paddingSizer = wx.BoxSizer(wx.VERTICAL)
-        paddingSizer.Add(topSizer, flag = wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, border = 16)
-        self.SetSizerAndFit(paddingSizer)
+        ##### Next/Prev Team Select Binds
+        teamenablesizer = wx.BoxSizer(wx.HORIZONTAL)
+        teamenable = wx.CheckBox( self, -1, 'Enable Team Select')
+        teamenable.SetToolTip( wx.ToolTip('Check this to enable the Next/Prev Team Select Binds') )
+        teamenable.Bind(wx.EVT_CHECKBOX, self.OnTeamEnable)
+        self.Ctrls['TeamEnable'] = teamenable
+        teamenable.SetValue(self.Init['TeamEnable'])
+
+        teamhelpbutton = HelpButton(self, 'TeamSelectBinds.html')
+
+        teamenablesizer.Add(teamenable, 0, wx.ALIGN_CENTER_VERTICAL)
+        teamenablesizer.Add(teamhelpbutton, wx.ALIGN_RIGHT)
+
+        rightSizer.Add(teamenablesizer, 0, wx.ALL, 10)
+
+        TeamSelBox = ControlGroup(self, self, 'Team Select')
+        for b in (
+            ['SelPrevTeam' , 'Choose the key that will select the previous teammate from the currently selected one'] ,
+            ['SelNextTeam' , 'Choose the key that will select the next teammate from the currently selected one']     ,
+            ['DecTeamSize' , 'Choose the key that will decrease the size of your teammate rotation']                  ,
+            ['IncTeamSize' , 'Choose the key that will increase the size of your teammate rotation']                  ,
+            ['DecTeamPos'  , 'Choose the key that will move you to the next lower position in the team rotation']         ,
+            ['IncTeamPos'  , 'Choose the key that will move you to the next higher position in the team rotation']        ,
+            ['TeamReset'   , 'Choose the key that will reset your next/prev teammate binds to Solo / No Position']                             ,
+        ):
+            TeamSelBox.AddControl(
+                ctlName = b[0],
+                ctlType = 'keybutton',
+                tooltip = b[1],
+            )
+        rightSizer.Add(TeamSelBox, 0, wx.EXPAND|wx.ALL, 10)
+
+
+        bottomSizer.Add(leftSizer,  0, wx.ALL|wx.EXPAND, 10)
+        bottomSizer.Add(rightSizer, 0, wx.ALL|wx.EXPAND, 10)
+        mainSizer.Add(gridSizer,    flag = wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, border = 16)
+        mainSizer.Add(bottomSizer, flag = wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, border = 16)
+        self.SetSizerAndFit(mainSizer)
 
         self.SynchronizeUI()
 

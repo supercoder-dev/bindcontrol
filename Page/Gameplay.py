@@ -4,6 +4,7 @@ from BLF import BLF
 from Help import HelpButton
 
 from UI.ControlGroup import ControlGroup
+from UI.KeySelectDialog import bcKeyButton
 from Page import Page
 
 ordinals = ("First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth")
@@ -38,19 +39,45 @@ class Gameplay(Page):
             'InviteTarget'  : '',
             'FPSBindKey'      : '',
             'NetgraphBindKey' : '',
+
+            'Tray1Enabled' : False,
+            'Tray2Enabled' : False,
+            'Tray3Enabled' : False,
         }
+        for tray in (3,2,1):
+            mod = ['', '', 'ALT+', 'SHIFT+'][tray]
+            for button in (1,2,3,4,5,6,7,8,9,0):
+                ctlname = f'Tray{tray}Button{button}'
+                self.Init[ctlname] = f"{mod}{button}"
+                UI.Labels[ctlname] = f"Tray {tray}, Button {button}"
 
     def BuildPage(self):
         mainSizer = wx.BoxSizer(wx.VERTICAL)
 
-        gridSizer = wx.BoxSizer(wx.VERTICAL)
+        ##### Power Tray Buttons
+        traySizer = wx.StaticBoxSizer(wx.VERTICAL, self, label = 'Power Tray Buttons')
+        trayGridSizer = wx.FlexGridSizer(11,3,0)
         for tray in (3,2,1):
-            rowSizer = wx.BoxSizer(wx.HORIZONTAL)
+            checkbox = wx.CheckBox(self, wx.ID_ANY, label = f"Tray {tray}")
+            checkbox.SetValue(self.Init.get(f'Tray{tray}Enabled', False))
+            checkbox.Bind(wx.EVT_CHECKBOX, self.SynchronizeUI)
+            self.Ctrls[f'Tray{tray}Enabled'] = checkbox
+            trayGridSizer.Add(checkbox, 0, wx.RIGHT|wx.ALIGN_CENTER_VERTICAL, 5)
+
             for button in (1,2,3,4,5,6,7,8,9,0):
-                rowSizer.Add(wx.Button(self, wx.ID_ANY, str(button)))
-            gridSizer.Add(rowSizer, 0, wx.ALL|wx.EXPAND)
+                ctlname = f'Tray{tray}Button{button}'
+                traybutton = bcKeyButton(self, wx.ID_ANY, init = {
+                    'CtlName'       : ctlname,
+                    'Key'           : self.Init[ctlname],
+                    'AlwaysShorten' : True,
+                })
+                self.Ctrls[ctlname] = traybutton
 
+                trayGridSizer.Add(traybutton, 1, wx.EXPAND)
 
+        traySizer.Add(trayGridSizer, 0, wx.ALL, 10)
+
+        # Bottom Sizer for narrower boxes
         bottomSizer = wx.BoxSizer(wx.HORIZONTAL)
 
         leftSizer = wx.BoxSizer(wx.VERTICAL)
@@ -90,22 +117,6 @@ class Gameplay(Page):
         leftSizer.Add(TPSDirectBox, 0, wx.EXPAND|wx.ALL, 10)
 
 
-        ### Helpful Binds
-        HelpfulSizer = ControlGroup(self, self, 'Helpful Binds')
-        for b in (
-            ['QuitToDesktop'   , 'Choose the key that will quit directly to the desktop']  ,
-            ['InviteTarget'    , 'Choose the key that will invite your target to a group'] ,
-            ['FPSBindKey'      , 'Choose the key that will toggle the FPS Display']        ,
-            ['NetgraphBindKey' , 'Choose the key that will toggle the Netgraph Display']   ,
-        ):
-            HelpfulSizer.AddControl(
-                ctlName = b[0],
-                ctlType = 'keybutton',
-                tooltip = b[1],
-            )
-
-        rightSizer.Add(HelpfulSizer, 0, wx.EXPAND|wx.ALL, 10)
-
         ##### Next/Prev Team Select Binds
         teamenablesizer = wx.BoxSizer(wx.HORIZONTAL)
         teamenable = wx.CheckBox( self, -1, 'Enable Team Select')
@@ -138,18 +149,38 @@ class Gameplay(Page):
             )
         rightSizer.Add(TeamSelBox, 0, wx.EXPAND|wx.ALL, 10)
 
+        ### Helpful Binds
+        HelpfulSizer = ControlGroup(self, self, 'Helpful Binds')
+        for b in (
+            ['QuitToDesktop'   , 'Choose the key that will quit directly to the desktop']  ,
+            ['InviteTarget'    , 'Choose the key that will invite your target to a group'] ,
+            ['FPSBindKey'      , 'Choose the key that will toggle the FPS Display']        ,
+            ['NetgraphBindKey' , 'Choose the key that will toggle the Netgraph Display']   ,
+        ):
+            HelpfulSizer.AddControl(
+                ctlName = b[0],
+                ctlType = 'keybutton',
+                tooltip = b[1],
+            )
+
+        rightSizer.Add(HelpfulSizer, 0, wx.EXPAND|wx.ALL, 10)
+
 
         bottomSizer.Add(leftSizer,  0, wx.ALL|wx.EXPAND, 10)
         bottomSizer.Add(rightSizer, 0, wx.ALL|wx.EXPAND, 10)
-        mainSizer.Add(gridSizer,    flag = wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, border = 16)
-        mainSizer.Add(bottomSizer, flag = wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, border = 16)
+        mainSizer.Add(traySizer,   flag = wx.ALL|          wx.ALIGN_CENTER_HORIZONTAL, border = 16)
+        mainSizer.Add(bottomSizer, flag = wx.LEFT|wx.RIGHT|wx.ALIGN_CENTER_HORIZONTAL, border = 16)
         self.SetSizerAndFit(mainSizer)
 
         self.SynchronizeUI()
 
-    def SynchronizeUI(self):
+    def SynchronizeUI(self, _ = None):
         self.OnTPSEnable()
         self.OnTeamEnable()
+        for button in (1,2,3,4,5,6,7,8,9,0):
+            self.Ctrls[f"Tray1Button{button}"].Enable(self.GetState('Tray1Enabled'))
+            self.Ctrls[f"Tray2Button{button}"].Enable(self.GetState('Tray2Enabled'))
+            self.Ctrls[f"Tray3Button{button}"].Enable(self.GetState('Tray3Enabled'))
 
     def OnTPSEnable(self, evt = None):
         self.EnableControls(self.GetState('TPSEnable'),

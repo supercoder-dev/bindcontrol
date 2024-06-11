@@ -16,10 +16,11 @@ from Page.Mastermind import Mastermind
 from Page.CustomBinds import CustomBinds
 
 import UI
-from UI.ControlGroup import bcKeyButton, cgStaticText, cgSpinCtrl, cgSpinCtrlDouble
+from UI.ControlGroup import cgStaticText, cgSpinCtrl, cgSpinCtrlDouble
 from UI.SimpleBindPane import SimpleBindPane
 from UI.BufferBindPane import BufferBindPane
 from UI.ComplexBindPane import ComplexBindPane
+from UI.KeySelectDialog import bcKeyButton
 
 class Profile(wx.Notebook):
 
